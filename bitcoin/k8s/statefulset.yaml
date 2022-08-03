@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: bitcoin-core
+spec:
+  serviceName: bitcoin-core
+  minReadySeconds: 10
+  selector:
+    matchLabels:
+      app: bitcoin-core
+  template:
+    metadata:
+      labels:
+        app: bitcoin-core
+    spec:
+      containers:
+      - name: bitcoin-core
+        image: bitcoin-core
+        imagePullPolicy: IfNotPresent
+        ports:
+          - containerPort: 8332
+            protocol: TCP
+        livenessProbe:
+          exec: 
+            command: [./bin/bitcoin-cli, -getinfo]
+          periodSeconds: 15
+          initialDelaySeconds: 15
+        volumeMounts:
+          - name: bitcoin-core-volume
+            mountPath: /home/bitcoin/.bitcoin
+        resources: # Example resource requests - setting to equal sets pod QoS to guaranteed
+          requests:
+            cpu: 2000m
+            memory: 2000M
+          limits:
+            cpu: 2000m
+            memory: 2000M
+  volumeClaimTemplates:
+    - metadata:
+        name: bitcoin-core-volume
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        # No storage class as just use default in this example
+        resources:
+          requests:
+            storage: 1G # Low as example

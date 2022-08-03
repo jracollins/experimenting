@@ -1,0 +1,16 @@
+apiVersion: skaffold/v2beta27
+kind: Config
+metadata:
+  name: bitcoin-core
+build:
+  local:
+    useDockerCLI: true
+  artifacts:
+  - image: bitcoin-core
+    docker:
+      dockerfile: Dockerfile
+      target: production
+deploy:
+  kustomize:
+    paths:
+     - k8s
